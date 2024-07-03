@@ -12,8 +12,23 @@
 
     <ul>
         <li v-for="(task, index) in tasks" :key="index">
-            {{ task }}
-            <button @click="removeTask(index)">Remover</button>
+
+          <div v-if="task.isEditing" class="edit-group">
+            <input v-model="task.text" @keyup.enter="finishEdit(task)" class="edit-input"/>
+            <button @click="finishEdit(task)" class="save-button">Salvar</button>
+
+          </div>
+          
+          <div v-else class="task-group">
+            {{ task.text }}
+
+            <div class="manage-task">
+              <button @click="editTask(index)"><font-awesome-icon icon="edit"/></button>
+              <button @click="removeTask(index)"><font-awesome-icon icon="trash" /></button>
+
+            </div>
+          </div>
+            
         </li>
     </ul>
  </div>
@@ -21,8 +36,8 @@
 </template>
 
 <script>
-
     export default {
+      
         data() {
             return {
                 newTask: '',
@@ -30,18 +45,31 @@
             }
         
     },
+
+    
+
     methods: {
         addTask() {
-            if (this.newTask.trim() !== '' && !this.tasks.includes(this.newTask)) {
-                this.tasks.push(this.newTask);
+            if (this.newTask.trim() && !this.tasks.some(task => task.text === this.newTask.trim())) {
+                this.tasks.push({text: this.newTask, isEditing: false});
                 this.newTask = '';
 
             }
         },
         removeTask(index) {
             this.tasks.splice(index, 1);
+        },
+        editTask(index, newText) {
+            this.tasks[index].isEditing = true;
+            if (newText && newText.trim() !== '') {
+                this.tasks[index].text = newText.trim();
+                this.tasks[index].isEditing = false;
+            }
+        },
+        finishEdit(task) {
+        task.isEditing = false;
         }
-    }
+      }
     }
 </script>
 
@@ -88,5 +116,29 @@ button {
   border: none;
   padding: 5px 10px;
   cursor: pointer;
+}
+.manage-task {
+  display: flex;
+  gap: 5px;
+}
+.task-group {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.edit-group {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-height: 2rem;
+}
+
+.edit-input {
+  width: 80%;
+}
+
+.save-button {
+  width: auto;
 }
 </style>
